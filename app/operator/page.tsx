@@ -100,12 +100,14 @@ export default function OperatorPage() {
         body: JSON.stringify({
           client_event_id: event.event_id,
           event_type: type,
-          match_id: 1,
-          team_id: 1,
-          player_id: payload.player_id ?? getDemoPlayerId(player),
-          related_player_id: payload.related_player_id ?? (payload.related_player ? getDemoPlayerId(payload.related_player) : undefined),
-          quarter,
-          game_clock: fmt(seconds),
+          // V2.1.14: match_events zorunlu alanları hiçbir zaman boş gitmez.
+          // Demo SQL: match_id=1, team_id=1, player_id=1..12.
+          match_id: Number(payload.match_id ?? 1),
+          team_id: Number(payload.team_id ?? 1),
+          player_id: payload.player_id ?? getDemoPlayerId(player) ?? null,
+          related_player_id: payload.related_player_id ?? (payload.related_player ? getDemoPlayerId(payload.related_player) : null),
+          quarter: Number(payload.quarter ?? quarter ?? 1),
+          game_clock: payload.game_clock || fmt(seconds) || '10:00',
           operator_side: 'HOME_OPERATOR',
           sync_source: 'OPERATOR_WEB',
           client_created_at: new Date().toISOString(),
@@ -305,7 +307,7 @@ export default function OperatorPage() {
     <div className="operator-page">
       <header className="score-header">
         <div className="team-score">
-          <div><span>EV SAHİBİ</span><h1>TOFAŞ U14</h1></div>
+          <div><span>EV SAHİBİ</span><h1>FİNAL SPOR U14</h1></div>
           <b>{homeScore}</b>
         </div>
         <div className="clock-box">
@@ -316,7 +318,7 @@ export default function OperatorPage() {
           <button onClick={toggleOnline}>{online ? 'Offline Yap' : 'Online Yap'}</button>
         </div>
         <div className="team-score away">
-          <div><span>MİSAFİR</span><h1>GEMLİK U14</h1></div>
+          <div><span>MİSAFİR</span><h1>TOFAŞ U14</h1></div>
           <b>{awayScore}</b>
         </div>
       </header>
@@ -364,7 +366,7 @@ export default function OperatorPage() {
         </section>
 
         <aside className="roster-panel">
-          <div className="panel-title"><div><h2>TOFAŞ U14</h2><span>Sadece kontrol edilen takım</span></div></div>
+          <div className="panel-title"><div><h2>FİNAL SPOR U14</h2><span>Sadece kontrol edilen takım</span></div></div>
           <div className="roster-block">
             <h3>Sahadakiler</h3>
             {onCourt.map(p => <div key={p} className={`player-row ${selectedPlayer === p ? 'selected' : ''}`} onClick={() => setSelectedPlayer(p)}><div><b>{p}</b><small>Oyunda</small></div><button onClick={(e) => { e.stopPropagation(); setSubOut(p); }}>Değiş</button></div>)}

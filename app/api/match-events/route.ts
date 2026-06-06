@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { getUserId, hasSupabaseAdminEnv, jsonError } from '@/lib/apiHelpers';
 import { getSupabaseAdmin } from '@/lib/supabaseAdmin';
 
-// NONSTOP V2.1.13
-// Goal: every operator event should reach match_events with quarter/game_clock/details.
+// NONSTOP V2.1.14
+// Goal: every operator event should reach match_events with required fields filled.
 // The database may contain either stable event_type values or older legacy values.
 // We first try the stable value, then fall back to legacy values when Supabase rejects it.
 const STABLE_EVENT_TYPE_MAP: Record<string, string> = {
@@ -111,12 +111,12 @@ export async function POST(req: Request) {
       return jsonError(`unsupported event_type: ${rawEventType || '(empty)'}`, 400, { received: rawEventType, body });
     }
 
-    const quarter = asInteger(body.quarter, 1);
-    const matchId = asInteger(body.match_id, 1);
-    const teamId = asInteger(body.team_id, 1);
+    const quarter = Math.max(1, asInteger(body.quarter, 1) || 1);
+    const matchId = asInteger(body.match_id, 1) || 1;
+    const teamId = asInteger(body.team_id, 1) || 1;
     const playerId = asInteger(body.player_id);
     const relatedPlayerId = asInteger(body.related_player_id);
-    const gameClock = body.game_clock || body.clock || null;
+    const gameClock = body.game_clock || body.clock || '10:00';
 
     const notesObject = {
       raw_event_type: rawEventType,
@@ -149,8 +149,8 @@ export async function POST(req: Request) {
       notes: JSON.stringify(notesObject)
     };
 
-    if (!basePayload.match_id || !basePayload.team_id || !basePayload.quarter) {
-      return jsonError('match_id, team_id and quarter are required', 400, basePayload);
+    if (!Number.isFinite(Number(basePayload.match_id)) || !Number.isFinite(Number(basePayload.team_id)) || !Number.isFinite(Number(basePayload.quarter))) {
+      return jsonError('match_id, team_id and quarter are required and must be numbers', 400, basePayload);
     }
 
     if (!hasSupabaseAdminEnv()) {

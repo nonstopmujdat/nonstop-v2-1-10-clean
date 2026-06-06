@@ -48,16 +48,16 @@ BEGIN
         name = EXCLUDED.name;
 
   INSERT INTO clubs(id, city_id, name, short_name) VALUES
-  (1, v_city_id, 'TOFAŞ U14', 'TOFAŞ'),
-  (2, v_city_id, 'GEMLİK U14', 'GEMLİK')
+  (1, v_city_id, 'FİNAL SPOR U14', 'FİNAL'),
+  (2, v_city_id, 'TOFAŞ U14', 'TOFAŞ')
   ON CONFLICT (id) DO UPDATE
     SET city_id = EXCLUDED.city_id,
         name = EXCLUDED.name,
         short_name = EXCLUDED.short_name;
 
   INSERT INTO teams(id, club_id, category_id, season_id, name) VALUES
-  (1, 1, v_category_id, v_season_id, 'TOFAŞ U14'),
-  (2, 2, v_category_id, v_season_id, 'GEMLİK U14')
+  (1, 1, v_category_id, v_season_id, 'FİNAL SPOR U14'),
+  (2, 2, v_category_id, v_season_id, 'TOFAŞ U14')
   ON CONFLICT (id) DO UPDATE
     SET club_id = EXCLUDED.club_id,
         category_id = EXCLUDED.category_id,
