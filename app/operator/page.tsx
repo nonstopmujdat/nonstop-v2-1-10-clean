@@ -28,6 +28,7 @@ export default function OperatorPage() {
   const [homeScore, setHomeScore] = useState(52);
   const [awayScore] = useState(47);
   const [seconds, setSeconds] = useState(204);
+  const [quarter] = useState(4);
   const [timer, setTimer] = useState<any>(null);
   const [selectedPlayer, setSelectedPlayer] = useState('#7 Burak');
   const [feed, setFeed] = useState<string[]>([
@@ -101,8 +102,9 @@ export default function OperatorPage() {
           event_type: type,
           match_id: 1,
           team_id: 1,
-          player_id: getDemoPlayerId(player),
-          quarter: 4,
+          player_id: payload.player_id ?? getDemoPlayerId(player),
+          related_player_id: payload.related_player_id ?? (payload.related_player ? getDemoPlayerId(payload.related_player) : undefined),
+          quarter,
           game_clock: fmt(seconds),
           operator_side: 'HOME_OPERATOR',
           sync_source: 'OPERATOR_WEB',
@@ -211,8 +213,10 @@ export default function OperatorPage() {
   function saveShot(context: ShotContext, shot?: { x: number; y: number }) {
     const isFreeThrow = context.points === 1;
     const type = isFreeThrow
-      ? (context.made ? 'FTM' : 'FTA_MISS')
-      : `${context.points}P${context.made ? 'M' : 'A_MISS'}`;
+      ? (context.made ? 'FTA_MADE' : 'FTA_MISS')
+      : (context.points === 2
+        ? (context.made ? '2PA_MADE' : '2PA_MISS')
+        : (context.made ? '3PA_MADE' : '3PA_MISS'));
     const tag = context.tags.length ? context.tags.join('-') : (context.made ? 'SAYI' : 'İSABETSİZ');
 
     addQueue(type, context.player, { ...context, linked_basket_id: context.linked_basket_id, shot_x: shot?.x, shot_y: shot?.y, made: context.made, tags: context.tags });
@@ -220,15 +224,15 @@ export default function OperatorPage() {
     log(`${fmt(seconds)} ${context.player} ${type} ${tag}${shot ? ` (${shot.x.toFixed(0)}%, ${shot.y.toFixed(0)}%)` : ''}`);
 
     if (context.made && context.assist && context.assist !== 'YOK' && context.assist !== 'PENDING') {
-      addQueue('AST', context.assist, { linked_basket_id: context.linked_basket_id, assist: context.assist });
+      addQueue('AST', context.assist, { linked_basket_id: context.linked_basket_id, assist: context.assist, related_player_id: getDemoPlayerId(context.player) });
       log(`${fmt(seconds)} ${context.assist} AST`);
     }
 
     if (context.made && context.foul && context.foul !== 'YOK' && context.foul !== 'PENDING') {
-      addQueue('FD', context.player, { linked_basket_id: context.linked_basket_id, drawn_by: context.player });
-      addQueue('PF', context.foul, { linked_basket_id: context.linked_basket_id, committed_by: context.foul });
-      log(`${fmt(seconds)} ${context.player} FD`);
-      log(`${fmt(seconds)} ${context.foul} PF`);
+      addQueue('FOUL_DRAWN', context.player, { linked_basket_id: context.linked_basket_id, drawn_by: context.player });
+      addQueue('FOUL', context.foul, { linked_basket_id: context.linked_basket_id, committed_by: context.foul });
+      log(`${fmt(seconds)} ${context.player} FOUL_DRAWN`);
+      log(`${fmt(seconds)} ${context.foul} FOUL`);
     }
   }
 
@@ -290,7 +294,7 @@ export default function OperatorPage() {
     });
 
     setSelectedPlayer(playerIn);
-    addQueue('SUBSTITUTION', playerIn, { player_out: playerOut, player_in: playerIn });
+    addQueue('SUBSTITUTION', playerOut, { player_out: playerOut, player_in: playerIn, related_player_id: getDemoPlayerId(playerIn) });
     log(`${fmt(seconds)} DEĞİŞİKLİK: ${playerOut} OUT / ${playerIn} IN`);
     setSubOut(null);
   }
@@ -305,7 +309,7 @@ export default function OperatorPage() {
           <b>{homeScore}</b>
         </div>
         <div className="clock-box">
-          <span>4. ÇEYREK</span>
+          <span>{quarter}. ÇEYREK</span>
           <strong>{fmt(seconds)}</strong>
           <div className="clock-buttons"><button onClick={startClock}>▶</button><button onClick={stopClock}>⏸</button></div>
           <small>{online ? 'ONLINE' : 'OFFLINE'} / Queue: {typeof window !== 'undefined' ? getQueue().filter(e => e.status !== 'synced').length : 0}</small>
@@ -327,10 +331,10 @@ export default function OperatorPage() {
           <button onClick={() => eventOnly('DREB')}>Rib. S</button>
           <button onClick={() => eventOnly('STL')}>Top Çalma</button>
           <button onClick={() => eventOnly('TOV')}>Top Kaybı</button>
-          <button onClick={() => startFoulPick('PF')}>Faul</button>
-          <button onClick={() => startFoulPick('FD')}>Faul Aldı</button>
+          <button onClick={() => startFoulPick('FOUL')}>Faul</button>
+          <button onClick={() => startFoulPick('FOUL_DRAWN')}>Faul Aldı</button>
           <button onClick={() => eventOnly('BLK')}>Blok</button>
-          <button onClick={() => eventOnly('BY')}>Blok Yedi</button>
+          <button onClick={() => eventOnly('BLK_AGAINST')}>Blok Yedi</button>
         </div>
       </section>
 
