@@ -106,8 +106,59 @@ body {
   gap: 1.5rem;
 }
 .nn-grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+.nn-grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
 .nn-grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
 .nn-grid-cols-6 { grid-template-columns: repeat(6, 1fr); }
+
+/* Responsive Grid for Cards */
+.nn-grid-responsive {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-auto-rows: auto;
+}
+
+/* Responsive Design */
+@media (max-width: 1400px) {
+  .nn-grid-cols-6 { grid-template-columns: repeat(3, 1fr); }
+  .nn-grid-responsive { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+}
+
+@media (max-width: 1024px) {
+  .nn-title { font-size: 3rem; }
+  .nn-grid-cols-6 { grid-template-columns: repeat(3, 1fr); }
+  .nn-grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .nn-container { padding: 1.5rem; }
+  .nn-header-area { margin-bottom: 2rem; padding-bottom: 1rem; }
+  .nn-card { padding: 1.2rem; }
+  .nn-card h2 { font-size: 1.5rem; }
+  .nn-grid-responsive { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
+}
+
+@media (max-width: 768px) {
+  .nn-title { font-size: 2.5rem; }
+  .nn-subtitle { font-size: 0.95rem; }
+  .nn-header-area { flex-direction: column; gap: 1.5rem; }
+  .nn-header-area > div:last-child { width: 100%; }
+  .nn-link { font-size: 1rem; }
+  .nn-grid-cols-6 { grid-template-columns: repeat(2, 1fr); }
+  .nn-grid-cols-4 { grid-template-columns: repeat(2, 1fr); }
+  .nn-grid-cols-2 { grid-template-columns: 1fr; }
+  .nn-card { padding: 1rem; }
+  .nn-card h2 { font-size: 1.3rem; }
+  .nn-card p { font-size: 0.9rem; }
+  .nn-grid-responsive { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.8rem; }
+}
+
+@media (max-width: 480px) {
+  .nn-title { font-size: 2rem; }
+  .nn-container { padding: 1rem; }
+  .nn-grid-cols-6 { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+  .nn-stat-value { font-size: 1.5rem; }
+  .nn-card { padding: 0.75rem; border-radius: 8px; }
+  .nn-card h2 { font-size: 1.1rem; margin-bottom: 0.25rem; }
+  .nn-card p { font-size: 0.8rem; line-height: 1.3; }
+  .nn-grid-responsive { grid-template-columns: 1fr; gap: 0.75rem; }
+  .nn-link { font-size: 0.85rem; }
+}
 
 /* Stats Ticker / Board */
 .nn-stat-box {
